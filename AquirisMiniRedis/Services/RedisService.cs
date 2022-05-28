@@ -1,13 +1,17 @@
 ﻿using AquirisMiniRedis.Model;
 using AquirisMiniRedis.Services.Contracts;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Linq;
 
 namespace AquirisMiniRedis.Services
 {
     public class RedisService : IRedisService
     {
         private ConcurrentDictionary<string, RedisData> database = new ConcurrentDictionary<string, RedisData>();
+        private ReaderWriterLockSlim cacheLock = new ReaderWriterLockSlim();
 
         public int DbSize()
         {
@@ -40,36 +44,56 @@ namespace AquirisMiniRedis.Services
 
         public void Set(string key, string value)
         {
-            database.TryAdd(key, new RedisStrings() { value = value, expire = 0 });
+            database.TryAdd(key, new RedisData() { value = value});
         }
 
-        public void Set(string key, string value, float expire)
+        public void Set(string key, string value, int expire)
         {
-            database.TryAdd(key, new RedisStrings() { value = value, expire = expire });
+            database.TryAdd(key, new RedisData() { value = value, expire = DateTime.Now.AddSeconds(expire) });
         }
 
         public void ZAdd(string key, int score, string value)
         {
-            // nao pode repetir o campo value mas o score pode sofrer update com um novo zadd de mesmo valor
-            database.GetOrAdd(key, new RedisSortedSets() {
-                score = score, 
-                value = value
-            });
+            var zData = database.GetValueOrDefault(key);
+
+            if (zData == null || zData.zvalue.Count == null)
+            {
+                database.GetOrAdd(key, new RedisData()
+                {
+                    zvalue = new Dictionary<string, int>() { [value] = score }
+                });
+            }
+            else
+            {
+                cacheLock.EnterReadLock();
+                try
+                {
+                    zData.zvalue[value] = score;
+                }
+                finally
+                {
+                    cacheLock.ExitReadLock();
+                }
+            }
         }
 
-        public void ZCard()
+        public int ZCard(string key)
         {
-            throw new System.NotImplementedException();
+            var zData = database.GetValueOrDefault(key);
+            return zData.zvalue.Count;
         }
 
-        public void ZRange()
+        public List<string> ZRange(string key, int init, int end)
         {
-            throw new System.NotImplementedException();
+            var seilaeu = database.GetValueOrDefault(key).zvalue.ToList().OrderBy(x => x.Value).ThenBy(x => x.Key).Select(x => x.Key);
+
+            return seilaeu.ToList();
         }
 
-        public void ZRank()
+        public int ZRank(string key, string value)
         {
-            throw new System.NotImplementedException();
+            var rank = ZRange(key, 0, -1);
+            return rank.IndexOf(value);
         }
     }
 }

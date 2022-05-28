@@ -1,18 +1,19 @@
 ﻿using AquirisMiniRedis.Model;
+using System.Collections.Generic;
 
 namespace AquirisMiniRedis.Services.Contracts
 {
     public interface IRedisService
     {
         public void Set(string key, string value);
-        public void Set(string key, string value, float expire);
+        public void Set(string key, string value, int expire);
         public RedisData Get(string key);
         public void Del(string key);
         public int DbSize();
         public void Incr(string key);
         public void ZAdd(string key, int score, string value);
-        public void ZCard();
-        public void ZRank();
-        public void ZRange();
+        public int ZCard(string key);
+        public int ZRank(string key, string value);
+        public List<string> ZRange(string key, int init, int end);
     }
 }

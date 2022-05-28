@@ -1,3 +1,4 @@
+using AquirisMiniRedis.Services;
 using AquirisMiniRedis.Services.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +21,7 @@ namespace AquirisMiniRedis
         {
             services.AddControllers();
 
-            services.AddSingleton<IRedisService>();
+            services.AddSingleton<IRedisService, RedisService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
