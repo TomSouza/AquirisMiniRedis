@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Timers;
 
 namespace AquirisMiniRedis.Model
 {
@@ -7,6 +7,6 @@ namespace AquirisMiniRedis.Model
     {
         public string value;
         public Dictionary<string, int> zvalue;
-        public DateTime? expire = null;
+        public Timer timer;
     }
 }

@@ -1,10 +1,10 @@
 ﻿using AquirisMiniRedis.Model;
 using AquirisMiniRedis.Services.Contracts;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
+using System;
 
 namespace AquirisMiniRedis.Services
 {
@@ -26,9 +26,10 @@ namespace AquirisMiniRedis.Services
             }
         }
 
-        public RedisData Get(string key)
+        public string Get(string key)
         {
-            return database.GetValueOrDefault(key);
+            RedisData result = database.GetValueOrDefault(key);
+            return result != null ? result.value : "(nil)";
         }
 
         public int Incr(string key)
@@ -48,14 +49,29 @@ namespace AquirisMiniRedis.Services
             return 0;
         }
 
-        public void Set(string key, string value)
+        public RedisData Set(string key, string value)
         {
-            database.TryAdd(key, new RedisData() { value = value});
+            RedisData newData = new RedisData() { value = value };
+
+            return database.AddOrUpdate(key, newData, (string key, RedisData oldValue) => {
+                if(oldValue.timer != null)
+                {
+                    oldValue.timer.Close();
+                }
+                return newData;
+            });
         }
 
         public void Set(string key, string value, int expire)
         {
-            database.TryAdd(key, new RedisData() { value = value, expire = DateTime.Now.AddSeconds(expire) });
+            RedisData data = Set(key, value);
+
+            data.timer = new System.Timers.Timer(expire * 1000);
+            data.timer.Elapsed += (Object source, System.Timers.ElapsedEventArgs e) => {
+                data.timer.Close();
+                database.TryRemove(key, out _);
+            };
+            data.timer.Start();
         }
 
         public int ZAdd(string key, int score, string value)
@@ -91,16 +107,23 @@ namespace AquirisMiniRedis.Services
         public int ZCard(string key)
         {
             var zData = database.GetValueOrDefault(key);
-            return zData.zvalue != null ? zData.zvalue.Count : 0;
+            return zData != null ? zData.zvalue.Count : 0;
         }
 
         public List<string> ZRange(string key, int init, int end)
         {
-            var orderedDictionary = database.GetValueOrDefault(key).zvalue
+            var dictionary = database.GetValueOrDefault(key);
+
+            if (dictionary == null)
+            {
+                return new List<string>();
+            }
+
+            var orderedDictionary = dictionary.zvalue
                 .ToList().OrderBy(x => x.Value).ThenByDescending(x => x.Key)
                 .Select(x => x.Key);
 
-            var returnList = end > -1
+            var returnList = end == -1
                 ? orderedDictionary.ToList()
                 : orderedDictionary.ToList().GetRange(init, end);
 

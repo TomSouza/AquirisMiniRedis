@@ -5,9 +5,9 @@ namespace AquirisMiniRedis.Services.Contracts
 {
     public interface IRedisService
     {
-        public void Set(string key, string value);
+        public RedisData Set(string key, string value);
         public void Set(string key, string value, int expire);
-        public RedisData Get(string key);
+        public string Get(string key);
         public void Del(string[] key);
         public int DbSize();
         public int Incr(string key);
