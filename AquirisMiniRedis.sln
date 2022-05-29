@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquirisMiniRedis", "AquirisMiniRedis\AquirisMiniRedis.csproj", "{559A9066-1299-4E83-BE62-001A8C732A97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquirisMiniRedis", "AquirisMiniRedis\AquirisMiniRedis.csproj", "{559A9066-1299-4E83-BE62-001A8C732A97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{3C06C593-D950-436D-95CE-E0F454FD5BFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{559A9066-1299-4E83-BE62-001A8C732A97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{559A9066-1299-4E83-BE62-001A8C732A97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{559A9066-1299-4E83-BE62-001A8C732A97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C06C593-D950-436D-95CE-E0F454FD5BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C06C593-D950-436D-95CE-E0F454FD5BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C06C593-D950-436D-95CE-E0F454FD5BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C06C593-D950-436D-95CE-E0F454FD5BFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
