@@ -51,7 +51,7 @@ namespace AquirisMiniRedis.Controllers
                     return Ok(resultSize);
 
                 case "DEL":
-                    _redisService.Del(args[1]);
+                    _redisService.Del(new ArraySegment<string>(args, 1, args.Length - 1).ToArray());
                     return Ok("OK");
 
                 case "INCR":

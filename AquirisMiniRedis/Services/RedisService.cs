@@ -18,9 +18,12 @@ namespace AquirisMiniRedis.Services
             return database.Count;
         }
 
-        public void Del(string key)
+        public void Del(string[] keys)
         {
-            database.TryRemove(key, out _);
+            foreach(string key in keys )
+            {
+                database.TryRemove(key, out _);
+            }
         }
 
         public RedisData Get(string key)

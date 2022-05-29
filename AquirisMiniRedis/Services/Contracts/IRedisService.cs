@@ -8,7 +8,7 @@ namespace AquirisMiniRedis.Services.Contracts
         public void Set(string key, string value);
         public void Set(string key, string value, int expire);
         public RedisData Get(string key);
-        public void Del(string key);
+        public void Del(string[] key);
         public int DbSize();
         public int Incr(string key);
         public int ZAdd(string key, int score, string value);
