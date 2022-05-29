@@ -10,8 +10,8 @@ namespace AquirisMiniRedis.Services.Contracts
         public RedisData Get(string key);
         public void Del(string key);
         public int DbSize();
-        public void Incr(string key);
-        public void ZAdd(string key, int score, string value);
+        public int Incr(string key);
+        public int ZAdd(string key, int score, string value);
         public int ZCard(string key);
         public int ZRank(string key, string value);
         public List<string> ZRange(string key, int init, int end);

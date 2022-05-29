@@ -1,5 +1,8 @@
-﻿using AquirisMiniRedis.Services.Contracts;
+﻿using AquirisMiniRedis.Model;
+using AquirisMiniRedis.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 
 namespace AquirisMiniRedis.Controllers
 {
@@ -22,75 +25,71 @@ namespace AquirisMiniRedis.Controllers
                 return Accepted();
             }
 
-            string comandQuery = cmd.Split(" ")[0];
-            string[] args;
+            string[] args = cmd.Split(" ");
 
-            switch (comandQuery)
+            switch (args[0])
             {
                 case "SET":
-
-                    args = cmd.Split(" ");
-
-                    string key = args[1];
-                    string value = args[2];
-                    int expire = 0;
-
                     if (args.Length > 3)
                     {
-                        int.TryParse(args[4], out expire);
+                        int.TryParse(args[4], out int expire);
+                        _redisService.Set(args[1], args[2], expire);
+                    }
+                    else
+                    {
+                        _redisService.Set(args[1], args[2]);
                     }
 
-                    _redisService.Set(key, value);
-                    break;
+                    return Ok("OK");
 
                 case "GET":
-                    args = cmd.Split(" ");
+                    RedisData resultGet =_redisService.Get(args[1]);
+                    return Ok(resultGet != null ? resultGet.value : "(nil)");
 
-                    key = args[1];
-
-                    _redisService.Get(key);
-                    break;
                 case "DBSIZE":
-                    _redisService.DbSize();
-                    break;
+                    int resultSize = _redisService.DbSize();
+                    return Ok(resultSize);
+
                 case "DEL":
-                    args = cmd.Split(" ");
+                    _redisService.Del(args[1]);
+                    return Ok("OK");
 
-                    key = args[1];
-
-                    _redisService.Del(key);
-                    break;
                 case "INCR":
-                    args = cmd.Split(" ");
+                    int resultIncrement = _redisService.Incr(args[1]);
 
-                    key = args[1];
+                    if(resultIncrement == 0)
+                    {
+                        return Ok("(error)value is not an integer or out of range");
+                    }
 
-                    _redisService.Incr(key);
-                    break;
+                    return Ok($"(integer) {resultIncrement}");
+
                 case "ZADD":
-                    args = cmd.Split(" ");
-
-                    key = args[1];
                     int.TryParse(args[2], out int score);
-                    value = args[3];
+                    int resultZAdd = _redisService.ZAdd(args[1], score, args[3]);
 
-                    _redisService.ZAdd(key, score, value);
-                    break;
+                    return Ok($"(integer) {resultZAdd}");
                 case "ZCARD":
-                    args = cmd.Split(" ");
-                    key = args[1];
+                    int resultZCard = _redisService.ZCard(args[1]);
 
-                    _redisService.ZCard(key);
-                    break;
+                    return Ok($"(integer) {resultZCard}");
                 case "ZRANGE":
-                    args = cmd.Split(" ");
-
-                    key = args[1];
                     int.TryParse(args[2], out int init);
                     int.TryParse(args[2], out int end);
+                    List<string> resultZRange = _redisService.ZRange(args[1], init, end);
+                    string result = String.Empty;
 
-                    _redisService.ZRange(key, init, end);
-                    break;
+                    foreach (string rank in resultZRange)
+                    {
+                        int index = resultZRange.IndexOf(rank) + 1;
+                        result += $"{index}) {rank}" + (index < resultZRange.Count ? Environment.NewLine : string.Empty);
+                    }
+
+                    return Ok(result);
+                case "ZRANK":
+                    int resultZRank = _redisService.ZRank(args[1], args[2]);
+
+                    return Ok($"(integer) {resultZRank}");
                 default:
                     break;
             }

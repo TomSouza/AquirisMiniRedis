@@ -28,18 +28,21 @@ namespace AquirisMiniRedis.Services
             return database.GetValueOrDefault(key);
         }
 
-        public void Incr(string key)
+        public int Incr(string key)
         {
             if (database.TryGetValue(key, out RedisData wrapper))
             {
                 lock (wrapper)
                 {
-                    if (int.TryParse(wrapper.value, out int n))
+                    if (int.TryParse(wrapper.value, out int number))
                     {
-                        wrapper.value = (n + 1).ToString();
+                        wrapper.value = (number + 1).ToString();
                     }
                 }
+                return int.TryParse(wrapper.value, out int value) ? value : 0;
             }
+
+            return 0;
         }
 
         public void Set(string key, string value)
@@ -52,12 +55,15 @@ namespace AquirisMiniRedis.Services
             database.TryAdd(key, new RedisData() { value = value, expire = DateTime.Now.AddSeconds(expire) });
         }
 
-        public void ZAdd(string key, int score, string value)
+        public int ZAdd(string key, int score, string value)
         {
             var zData = database.GetValueOrDefault(key);
+            int returnResult = 0;
 
-            if (zData == null || zData.zvalue.Count == null)
+            if (zData == null || zData.zvalue == null)
             {
+                returnResult = 1;
+
                 database.GetOrAdd(key, new RedisData()
                 {
                     zvalue = new Dictionary<string, int>() { [value] = score }
@@ -75,19 +81,27 @@ namespace AquirisMiniRedis.Services
                     cacheLock.ExitReadLock();
                 }
             }
+
+            return returnResult;
         }
 
         public int ZCard(string key)
         {
             var zData = database.GetValueOrDefault(key);
-            return zData.zvalue.Count;
+            return zData.zvalue != null ? zData.zvalue.Count : 0;
         }
 
         public List<string> ZRange(string key, int init, int end)
         {
-            var seilaeu = database.GetValueOrDefault(key).zvalue.ToList().OrderBy(x => x.Value).ThenBy(x => x.Key).Select(x => x.Key);
+            var orderedDictionary = database.GetValueOrDefault(key).zvalue
+                .ToList().OrderBy(x => x.Value).ThenByDescending(x => x.Key)
+                .Select(x => x.Key);
 
-            return seilaeu.ToList();
+            var returnList = end > -1
+                ? orderedDictionary.ToList()
+                : orderedDictionary.ToList().GetRange(init, end);
+
+            return returnList;
         }
 
         public int ZRank(string key, string value)
