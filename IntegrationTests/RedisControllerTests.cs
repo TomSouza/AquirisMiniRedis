@@ -208,16 +208,17 @@ namespace IntegrationTests
         public async Task Command_ZRangeKeyFiveFrist_ShouldReturnOk()
         {
             // Arrange
+            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "1", "Valor"));
             _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "1", "valor"));
-            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "2", "valor2"));
-            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "3", "valor3"));
+            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "10", "valor10"));
+            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "8", "valor8"));
             _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "4", "valor4"));
             _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "5", "valor5"));
             _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "6", "valor6"));
             _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "7", "valor7"));
-            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "8", "valor8"));
+            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "3", "valor3"));
             _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "9", "valor9"));
-            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "10", "valor10"));
+            _ = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZAdd, "testeZ", "2", "valor2"));
 
             // Act
             var result = await TestClient.GetAsync(String.Format(ApiRoutes.RedisCommands.ZRange, "testeZ", "0", "5"));
@@ -225,11 +226,11 @@ namespace IntegrationTests
             // Assert
             result.StatusCode.Should().Be(HttpStatusCode.OK);
             result.Content.ReadAsStringAsync().Result.Should().Be(
-                "1) valor" + Environment.NewLine
-                + "2) valor2" + Environment.NewLine
-                + "3) valor3" + Environment.NewLine
-                + "4) valor4" + Environment.NewLine
-                + "5) valor5"
+                "1) Valor" + Environment.NewLine
+                + "2) valor" + Environment.NewLine
+                + "3) valor2" + Environment.NewLine
+                + "4) valor3" + Environment.NewLine
+                + "5) valor4"
             );
         }
 
